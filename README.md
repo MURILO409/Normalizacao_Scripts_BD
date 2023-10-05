@@ -1,0 +1,1 @@
+# Normalizacao_Scripts_BD
