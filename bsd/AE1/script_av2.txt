@@ -1,0 +1,101 @@
+CREATE DATABASE av2 ;
+-- pessoa, profissao, morte, causa
+
+USE av2 ;
+
+
+CREATE TABLE pessoa ( 
+	cpf CHAR(11),
+	nome CHAR(30),
+	sexo CHAR(1),
+	salario FLOAT,
+	dt_nasc DATE,
+	dt_morte DATE,
+	id_causa INT
+     );
+	 
+	 INSERT INTO pessoa VALUES ( "11", "jose", "m", 1200, "2000/01/01","2019/10/10", 1 );   
+	 --  medico - morte por causa natural
+	 INSERT INTO pessoa VALUES ( "22", "joao", "m", 1300, "1990/02/02", "2015/02/22",  4);
+	 --  dentista - acidente - morreu no mesmo mes que nasceu
+	 INSERT INTO pessoa VALUES ( "33", "maria", "f", 1400, "2005/03/03", NULL, NULL );
+	 INSERT INTO pessoa VALUES ( "44", "carmem", "f", 1500, "1995/04/04", NULL, NULL);
+	 INSERT INTO pessoa VALUES ( "55", "carla", "f", 1600, "1990/05/05", NULL, NULL);
+	 INSERT INTO pessoa VALUES ( "66", "carlos", "m", 1700, "1980/06/06", NULL, NULL);
+	 
+	 
+CREATE TABLE profissao (
+	id_profissao INT PRIMARY KEY,
+	ds_profissao CHAR(25)
+     );
+	 INSERT INTO profissao VALUES ( 1, "medico" );
+	 INSERT INTO profissao VALUES ( 2, "dentista" );
+	 INSERT INTO profissao VALUES ( 3, "pedreiro" );
+	 INSERT INTO profissao VALUES ( 4, "professor" );
+	 INSERT INTO profissao VALUES ( 5, "motorista" );
+	
+CREATE TABLE causa (
+	id_causa INT PRIMARY KEY,
+	ds_causa CHAR(20)
+     );
+	
+	 INSERT INTO causa VALUES ( 1, "natural" );
+	 INSERT INTO causa VALUES ( 2, "doenca" );
+	 INSERT INTO causa VALUES ( 3, "crime" );
+	 INSERT INTO causa VALUES ( 4, "acidente" );
+	 INSERT INTO causa VALUES ( 5, "outras" );
+	 
+
+	
+
+CREATE TABLE trabalha_em ( 
+	cpf CHAR(11),
+	id_profissao INT
+     );
+	 
+	 INSERT INTO trabalha_em VALUES ( 11 , 1) ;  -- jose - medico
+	 INSERT INTO trabalha_em VALUES (  22, 2) ; -- joao - dentista
+	 INSERT INTO trabalha_em VALUES (  44, 3) ; -- carmem - pedreiro
+	 INSERT INTO trabalha_em VALUES (  55, 2) ; -- carla - dentista
+	 INSERT INTO trabalha_em VALUES (  66, 2) ; --  carlos - dentista
+
+
+ALTER TABLE pessoa ADD FOREIGN KEY (id_causa) REFERENCES causa (id_causa);
+ALTER TABLE trabalha_em ADD FOREIGN KEY (cpf) REFERENCES pessoa (cpf);
+ALTER TABLE trabalha_em ADD FOREIGN KEY (id_profissao) REFERENCES profissao (id_profissao);
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+I) SELECT nome, ds_profissao FROM pessoa, profissao, trabalha_em WHERE pessoa.cpf = trabalha_em.cpf AND profissao.id_profissao = trabalha_em.id_profissao;
+
+II) SELECT nome, dt_morte, ds_causa FROM pessoa, causa WHERE pessoa.dt_morte IS NOT NULL AND pessoa.id_causa = causa.id_causa;
+
+III) SELECT nome, cpf FROM pessoa WHERE id_causa = 1;
+
+IV) SELECT pessoa.nome, pessoa.cpf FROM pessoa, trabalha_em WHERE pessoa.cpf = trabalha_em.cpf AND trabalha_em.id_profissao = 2;
+
+V) SELECT SUM(salario) FROM pessoa, trabalha_em WHERE pessoa.cpf = trabalha_em.cpf AND trabalha_em.id_profissao = 2;
+
+VI) SELECT nome FROM pessoa WHERE dt_morte IS NULL AND sexo = "m";
+
+VII) SELECT nome, cpf, sexo, dt_nasc, dt_morte FROM pessoa WHERE dt_morte IS NOT NULL AND MONTH(dt_nasc) = MONTH(dt_morte);
+
+VIII) SELECT nome, FLOOR((TO_DAYS(dt_morte) - TO_DAYS(dt_nasc)) / 365.25) FROM pessoa, trabalha_em 
+WHERE pessoa.cpf = trabalha_em.cpf AND trabalha_em.id_profissao = 2 AND FLOOR(( TO_DAYS(dt_morte)- TO_DAYS(dt_nasc)) / 365.25) > 22;
+
+IX) SELECT AVG(salario) FROM pessoa;
+
+X) SELECT pessoa.nome FROM pessoa, trabalha_em 
+WHERE pessoa.cpf = trabalha_em.cpf AND trabalha_em.id_profissao = 1 AND 
+pessoa.nome LIKE "a%" OR pessoa.nome LIKE "e%" OR pessoa.nome LIKE "i%" OR pessoa.nome LIKE "o%" OR pessoa.nome LIKE "u%" AND
+pessoa.nome NOT LIKE "%a" AND pessoa.nome NOT LIKE "%e" AND pessoa.nome NOT LIKE "%i" AND pessoa.nome NOT LIKE "%o" AND pessoa.nome NOT LIKE "%u";
+
+XI) SELECT pessoa.nome FROM pessoa, trabalha_em 
+WHERE pessoa.cpf = trabalha_em.cpf AND trabalha_em.id_profissao = 2 AND trabalha_em.id_profissao = 3 AND
+pessoa.salario > 10000 AND pessoa.dt_morte IS NULL;
+
+XII) UPDATE pessoa SET salario = (FLOOR(salario * 1.12)) WHERE salario < 1500;
+ 
+	 
